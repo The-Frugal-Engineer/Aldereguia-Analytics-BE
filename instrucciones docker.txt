@@ -1,0 +1,10 @@
+mystifying_lichterman
+
+docker build -t flask_investment_simulator .
+
+docker run -p 8080:8080 flask_investment_simulator
+
+docker tag flask_investment_simulator:latest europe-west2-docker.pkg.dev/sanguine-city-433709-f8/flask-app/flask_investment_simulator:latest
+
+docker push  europe-west2-docker.pkg.dev/sanguine-city-433709-f8/flask-app/flask_investment_simulator:latest
+
