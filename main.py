@@ -10,18 +10,34 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 app = Flask(__name__)
 CORS(app)
 
-USERNAME = 'dartfordmadrid'
-PASSWORD = 'dartfordmadrid'
-
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'  # Change this in production
+app.config['SECRET_KEY'] = 'dartfordmadrid'
+app.config['JWT_SECRET_KEY'] = 'dartfordmadrid'  # Change this in production
 
 # Initialize JWT Manager
 jwt = JWTManager(app)
 
+users = {
+    'alex@example.com': {'password': 'fossil'},
+    'ruben@example.com': {'password': 'fluorine'},
+    'pablo@example.com': {'password': 'tennis'}
 
+}
+
+@app.route('/login', methods=['POST'])
+def login():
+    email = request.json.get('email', None)
+    password = request.json.get('password', None)
+
+    # Authenticate User
+    if email not in users or users[email]['password'] != password:
+        return jsonify({"msg": "Invalid credentials"}), 401
+
+    # Create JWT Token
+    access_token = create_access_token(identity=email)
+    return jsonify(access_token=access_token), 200
 
 @app.route("/calculations", methods=["POST"])
+@jwt_required()
 def get_example():
     # Retrieve JSON data from the request
     jsonrequest = request.get_json()
