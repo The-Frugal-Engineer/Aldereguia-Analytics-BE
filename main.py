@@ -3,6 +3,8 @@ from calculations import calculate_investments_montly, monte_carlo_simulation_mo
 from files import read_csv_to_panda
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+
 
 
 app = Flask(__name__)
@@ -11,32 +13,15 @@ CORS(app)
 USERNAME = 'dartfordmadrid'
 PASSWORD = 'dartfordmadrid'
 
+app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'  # Change this in production
 
-def check_auth(username, password):
-    """Check if a username/password combination is valid."""
-    return username == USERNAME and password == PASSWORD
+# Initialize JWT Manager
+jwt = JWTManager(app)
 
-
-def authenticate():
-    """Sends a 401 response that enables basic auth."""
-    return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
-
-
-def requires_auth(f):
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
-
-    return decorated
 
 
 @app.route("/calculations", methods=["POST"])
-@requires_auth
 def get_example():
     # Retrieve JSON data from the request
     jsonrequest = request.get_json()
