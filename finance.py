@@ -1,5 +1,5 @@
 import yfinance as yf
-import pandas as pd
+
 
 from files import write_panda_to_file
 
@@ -35,11 +35,17 @@ all_tickers = {
     "JPY=X": {"description": "US Dollar to Japanese Yen", "type": "Currency"},
     "BTC-USD": {"description": "Bitcoin to US Dollar", "type": "Cryptocurrency"},
     "^TNX": {"description": "US 10-Year Treasury Yield", "type": "Bond"},
-    "^TYX": {"description": "US 30-Year Treasury Yield", "type": "Bond"}
+    "^TYX": {"description": "US 30-Year Treasury Yield", "type": "Bond"},
+    "^IBEX": {"description": "IBEX 35 Index", "type": "Equity Index"}
+
 }
 
+some_tickers = {
+}
+
+
 default_start_date="2004-01-01"
-default_end_date="2024-08-01"
+default_end_date="2024-09-01"
 
 def refresh_asset(asset, start_date, end_date, resample='ME'):
     asset = yf.download(asset, start=start_date, end=end_date)
@@ -55,3 +61,14 @@ def refresh_all_assets():
         asset_matrix=refresh_asset(ticker, default_start_date, default_end_date)
         write_panda_to_file(asset_matrix, ticker)
 
+
+def refresh_some_assets():
+    for ticker, info in some_tickers.items():
+        description = info['description']
+        type_ = info['type']
+        print(f"Ticker: {ticker}, Description: {description}, Type: {type_}")
+        asset_matrix=refresh_asset(ticker, default_start_date, default_end_date)
+        write_panda_to_file(asset_matrix, ticker)
+
+
+refresh_all_assets()
