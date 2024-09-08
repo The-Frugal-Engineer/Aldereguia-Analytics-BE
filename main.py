@@ -4,14 +4,17 @@ from files import read_csv_to_panda
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-
+from datetime import timedelta
 
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['SECRET_KEY'] = 'dartfordmadrid'
-app.config['JWT_SECRET_KEY'] = 'dartfordmadrid'  # Change this in production
+app.config['SECRET_KEY'] = 'dartfordmadrid001'
+app.config['JWT_SECRET_KEY'] = 'dartfordmadrid001'  # Change this in production
+
+# Set the JWT token expiration to 24 hours
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 
 # Initialize JWT Manager
 jwt = JWTManager(app)
@@ -35,6 +38,19 @@ def login():
     # Create JWT Token
     access_token = create_access_token(identity=email)
     return jsonify(access_token=access_token), 200
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({"error": "Token has expired"}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return jsonify({"error": "Invalid token"}), 422
+
+@jwt.invalid_token_loader
+def missing_token_callback(error):
+    return jsonify({"error": "Token is missing"}), 401
+
 
 @app.route("/calculations", methods=["POST"])
 @jwt_required()
