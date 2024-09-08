@@ -3,40 +3,57 @@ from calculations import calculate_investments_montly, monte_carlo_simulation_mo
 from files import read_csv_to_panda
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from datetime import timedelta
 
 
 app = Flask(__name__)
 CORS(app)
 
-USERNAME = 'dartfordmadrid'
-PASSWORD = 'dartfordmadrid'
+app.config['SECRET_KEY'] = 'dartfordmadrid001'
+app.config['JWT_SECRET_KEY'] = 'dartfordmadrid001'  # Change this in production
 
+# Set the JWT token expiration to 24 hours
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 
-def check_auth(username, password):
-    """Check if a username/password combination is valid."""
-    return username == USERNAME and password == PASSWORD
+# Initialize JWT Manager
+jwt = JWTManager(app)
 
+users = {
+    'alex@example.com': {'password': 'fossil'},
+    'ruben@example.com': {'password': 'fluorine'},
+    'pablo@example.com': {'password': 'tennis'}
 
-def authenticate():
-    """Sends a 401 response that enables basic auth."""
-    return Response(
-        'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
-        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+}
 
+@app.route('/login', methods=['POST'])
+def login():
+    email = request.json.get('email', None)
+    password = request.json.get('password', None)
 
-def requires_auth(f):
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
+    # Authenticate User
+    if email not in users or users[email]['password'] != password:
+        return jsonify({"msg": "Invalid credentials"}), 401
 
-    return decorated
+    # Create JWT Token
+    access_token = create_access_token(identity=email)
+    return jsonify(access_token=access_token), 200
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({"error": "Token has expired"}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return jsonify({"error": "Invalid token"}), 422
+
+@jwt.invalid_token_loader
+def missing_token_callback(error):
+    return jsonify({"error": "Token is missing"}), 401
 
 
 @app.route("/calculations", methods=["POST"])
-@requires_auth
+@jwt_required()
 def get_example():
     # Retrieve JSON data from the request
     jsonrequest = request.get_json()
