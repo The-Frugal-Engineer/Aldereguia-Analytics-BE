@@ -1,10 +1,10 @@
 mystifying_lichterman
 
-docker build -t flask_investment_simulator .
+docker build -t aldereguia_analytics_be .
 
-docker run -p 8080:8080 flask_investment_simulator
+docker run -p 8080:8080 aldereguia_analytics_be
 
-docker tag flask_investment_simulator:latest europe-west2-docker.pkg.dev/sanguine-city-433709-f8/flask-app/flask_investment_simulator:latest
+docker tag aldereguia_analytics_be:latest europe-west2-docker.pkg.dev/sanguine-city-433709-f8/flask-app/aldereguia_analytics_be:latest
 
-docker push  europe-west2-docker.pkg.dev/sanguine-city-433709-f8/flask-app/flask_investment_simulator:latest
+docker push  europe-west2-docker.pkg.dev/sanguine-city-433709-f8/flask-app/aldereguia_analytics_be:latest
 

@@ -11,7 +11,7 @@ def calculate_investments_montly(total_matrix, invested,initial_investment=0, ye
     start_year = int(year)
     total_matrix = total_matrix[total_matrix.index.year >= start_year]
     # Keep only the first day of each month
-    monthly_matrix = total_matrix.groupby(pd.Grouper(freq='ME')).first()
+    monthly_matrix = total_matrix.groupby(pd.Grouper(freq='M')).first()
 
     # Reset the index if needed
     monthly_matrix.reset_index(inplace=True)
@@ -51,7 +51,7 @@ def monte_carlo_simulation_monthly(asset,initial_investment=0 , monthly_investme
     asset['Date'] = pd.to_datetime(asset['Date'])
     asset.set_index('Date', inplace=True)
     # Step 2: Calculate monthly log returns
-    asset['Monthly Return'] = asset['Adj Close'].resample('ME').ffill().pct_change()
+    asset['Monthly Return'] = asset['Adj Close'].resample('M').ffill().pct_change()
     asset['Log Returns'] = np.log(1 + asset['Monthly Return'])
 
     # Step 3: Calculate drift and volatility for monthly returns

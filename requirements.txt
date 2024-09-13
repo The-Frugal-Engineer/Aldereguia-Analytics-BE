@@ -1,0 +1,9 @@
+setuptools
+Flask==2.1.2
+Werkzeug==2.0.1
+gunicorn==20.1.0
+pandas==2.0.1
+numpy==1.24.3
+yfinance==0.2.43
+Flask-Cors==4.0.1
+flask_jwt_extended==4.6.0

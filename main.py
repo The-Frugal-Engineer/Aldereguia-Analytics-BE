@@ -22,7 +22,8 @@ jwt = JWTManager(app)
 users = {
     'alex@example.com': {'password': 'fossil'},
     'ruben@example.com': {'password': 'fluorine'},
-    'pablo@example.com': {'password': 'tennis'}
+    'pablo@example.com': {'password': 'tennis'},
+    'alex@alex.com': {'password': 'fishing'}
 
 }
 
