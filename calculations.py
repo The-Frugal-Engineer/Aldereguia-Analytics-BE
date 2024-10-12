@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 
-def calculate_investments_montly(total_matrix, invested,initial_investment=0, year='2004'):
 
+def calculate_investments_montly(total_matrix, invested, initial_investment=0, year='2004', increase=0):
     # Set the Date column as the index (optional but useful for datetime operations)
     total_matrix['Date'] = pd.to_datetime(total_matrix['Date'])
     total_matrix.set_index('Date', inplace=True)
@@ -16,37 +16,41 @@ def calculate_investments_montly(total_matrix, invested,initial_investment=0, ye
     # Reset the index if needed
     monthly_matrix.reset_index(inplace=True)
 
-
-    adj_close=monthly_matrix['Adj Close']
+    adj_close = monthly_matrix['Adj Close']
     total_invested_array = []
     total_participations_array = []
     total_position_array = []
-    total_position=0.0
-    total_invested=0.0
-    #calculate participations of the initial investment
+    total_position = 0.0
+    total_invested = 0.0
+    # Calculate monthly increments
+    if increase > 0:
+        montly_increase_percentage = (increase / 12) / 100
+    else:
+        montly_increase_percentage = 0
+    # calculate participations of the initial investment
     if initial_investment > 0:
-        first_adj_price=adj_close[0]
-        total_position=initial_investment/first_adj_price
+        first_adj_price = adj_close[0]
+        total_position = initial_investment / first_adj_price
     for adj in adj_close:
-        total_invested=invested+total_invested
+        total_invested = invested + total_invested
         total_position = (invested / adj) + total_position
-        #Add elements to array
+        # Add elements to array
         total_participations_array.append(total_position)
-        total_position_array.append(total_position *adj)
+        total_position_array.append(total_position * adj)
         total_invested_array.append(total_invested)
-        
-        
+        # Calculate increments to the invested amount
+        invested = invested + (invested * montly_increase_percentage)
 
-    monthly_matrix['TotalInvested']=total_invested_array
+    monthly_matrix['TotalInvested'] = total_invested_array
     monthly_matrix['TotalParticipations'] = total_participations_array
     monthly_matrix['TotalPosition'] = total_position_array
     # Display the result
-    #monthly_matrix.to_csv("matrix.csv")
+    # monthly_matrix.to_csv("matrix.csv")
     return monthly_matrix
 
 
-
-def monte_carlo_simulation_monthly(asset,initial_investment=0 , monthly_investment=1000, T_years=10, N_simulations=1000):
+def monte_carlo_simulation_monthly(asset, initial_investment=0, monthly_investment=1000, T_years=10, increase=0,
+                                   N_simulations=1000 ):
     # Step 1: Download historical asset data
     asset['Date'] = pd.to_datetime(asset['Date'])
     asset.set_index('Date', inplace=True)
@@ -83,9 +87,15 @@ def monte_carlo_simulation_monthly(asset,initial_investment=0 , monthly_investme
     total_position_array = []
     total_position = 0.0
     total_invested = 0.0
-    #Original investments. Calculate how many stoks I have with my original invesment or position
-    if initial_investment>0:
-        total_position=initial_investment/S0
+    # Calculate monthly increments
+    if increase > 0:
+        montly_increase_percentage = (increase / 12) / 100
+    else:
+        montly_increase_percentage = 0
+
+    # Original investments. Calculate how many stoks I have with my original invesment or position
+    if initial_investment > 0:
+        total_position = initial_investment / S0
     for simulated_value in average_path:
         total_invested = monthly_investment + total_invested
         total_position = (monthly_investment / simulated_value) + total_position
@@ -93,6 +103,8 @@ def monte_carlo_simulation_monthly(asset,initial_investment=0 , monthly_investme
         total_participations_array.append(total_position)
         total_position_array.append(total_position * simulated_value)
         total_invested_array.append(total_invested)
+        # Calculate montly increments to the invested amount
+        monthly_investment = monthly_investment + (monthly_investment * montly_increase_percentage)
 
     simulated_results = pd.DataFrame({
         'Date': simulation_dates,
@@ -100,9 +112,6 @@ def monte_carlo_simulation_monthly(asset,initial_investment=0 , monthly_investme
         'TotalParticipations': total_participations_array,
         'TotalPosition': total_position_array,
 
-
     })
-
-
 
     return simulated_results

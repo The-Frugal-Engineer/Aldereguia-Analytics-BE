@@ -68,9 +68,11 @@ def get_example():
     ticker = jsonrequest.get('ticker')
     simulation_type = jsonrequest.get('simulation_type')
     initial_investment = jsonrequest.get('initial_investment')
+    increase = jsonrequest.get('increase')
 
     try:
         amount = int(amount)
+        increase = int(increase)
         year = int(year)
         initial_investment = int(initial_investment)
     except (TypeError, ValueError):
@@ -78,9 +80,9 @@ def get_example():
 
     total_matrix = read_csv_to_panda(ticker)
     if simulation_type == "past":
-        monthly_matrix=calculate_investments_montly(total_matrix, amount,initial_investment, year)
+        monthly_matrix=calculate_investments_montly(total_matrix, amount,initial_investment, year, increase)
     else:
-        monthly_matrix = monte_carlo_simulation_monthly(total_matrix,initial_investment , amount, year)
+        monthly_matrix = monte_carlo_simulation_monthly(total_matrix,initial_investment , amount, year, increase)
     response = jsonify(monthly_matrix.to_dict())
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response  # Convert DataFrame to dict and return as JSON
